@@ -15,11 +15,20 @@
 
 #define SOIL_CHECK_FOR_GL_ERRORS 0
 
+#define SOIL_SUPPORT_CONTEXT_ABOVE_3_1 1
+
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <wingdi.h>
+
+#ifdef SOIL_SUPPORT_CONTEXT_ABOVE_3_1
+#include "glew.h"
+#else
 #include <GL/gl.h>
+#endif // SOIL_SUPPORT_CONTEXT_ABOVE_3_1
+
+
 #elif defined(__APPLE__) || defined(__APPLE_CC__)
 /*	I can't test this Apple stuff!	*/
 #include <OpenGL/gl.h>
@@ -38,7 +47,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <map>
+
+#ifdef SOIL_SUPPORT_CONTEXT_ABOVE_3_1
+#include <set>
+#include <string>
+#endif
 
 /*	error reporting	*/
 char *result_string_pointer = "SOIL initialized";
@@ -85,6 +98,17 @@ int query_DXT_capability(void);
 #define SOIL_RGBA_S3TC_DXT5		0x83F3
 typedef void (APIENTRY * P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC) (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid * data);
 P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC soilGlCompressedTexImage2D = NULL;
+
+/*
+*	returns true if specified functionality is supported
+*/
+bool isFeatureSupported(
+#ifdef SOIL_SUPPORT_CONTEXT_ABOVE_3_1
+	const std::string& featureName
+#else
+	const char* featureName
+#endif
+);
 
 unsigned int SOIL_direct_load_DDS(
 	const char *filename,
@@ -1920,10 +1944,7 @@ int query_NPOT_capability(void)
 	if (has_NPOT_capability == SOIL_CAPABILITY_UNKNOWN)
 	{
 		/*	we haven't yet checked for the capability, do so	*/
-		if (
-			(NULL == strstr((char const*)glGetString(GL_EXTENSIONS),
-				"GL_ARB_texture_non_power_of_two"))
-			)
+		if (!isFeatureSupported("GL_ARB_texture_non_power_of_two"))
 		{
 			/*	not there, flag the failure	*/
 			has_NPOT_capability = SOIL_CAPABILITY_NONE;
@@ -1945,15 +1966,12 @@ int query_tex_rectangle_capability(void)
 	{
 		/*	we haven't yet checked for the capability, do so	*/
 		if (
-			(NULL == strstr((char const*)glGetString(GL_EXTENSIONS),
-				"GL_ARB_texture_rectangle"))
+			(!isFeatureSupported("GL_ARB_texture_rectangle"))
 			&&
-			(NULL == strstr((char const*)glGetString(GL_EXTENSIONS),
-				"GL_EXT_texture_rectangle"))
+			(!isFeatureSupported("GL_EXT_texture_rectangle"))
 			&&
-			(NULL == strstr((char const*)glGetString(GL_EXTENSIONS),
-				"GL_NV_texture_rectangle"))
-			)
+			(!isFeatureSupported("GL_NV_texture_rectangle"))
+		)
 		{
 			/*	not there, flag the failure	*/
 			has_tex_rectangle_capability = SOIL_CAPABILITY_NONE;
@@ -1975,11 +1993,8 @@ int query_cubemap_capability(void)
 	{
 		/*	we haven't yet checked for the capability, do so	*/
 		if (
-			(NULL == strstr((char const*)glGetString(GL_EXTENSIONS),
-				"GL_ARB_texture_cube_map"))
-			&&
-			(NULL == strstr((char const*)glGetString(GL_EXTENSIONS),
-				"GL_EXT_texture_cube_map"))
+			(!isFeatureSupported("GL_ARB_texture_cube_map"))
+			&& (!isFeatureSupported("GL_EXT_texture_cube_map"))
 			)
 		{
 			/*	not there, flag the failure	*/
@@ -2001,9 +2016,7 @@ int query_DXT_capability(void)
 	if (has_DXT_capability == SOIL_CAPABILITY_UNKNOWN)
 	{
 		/*	we haven't yet checked for the capability, do so	*/
-		if (NULL == strstr(
-			(char const*)glGetString(GL_EXTENSIONS),
-			"GL_EXT_texture_compression_s3tc"))
+		if (!isFeatureSupported("GL_EXT_texture_compression_s3tc"))
 		{
 			/*	not there, flag the failure	*/
 			has_DXT_capability = SOIL_CAPABILITY_NONE;
@@ -2070,4 +2083,37 @@ int query_DXT_capability(void)
 	}
 	/*	let the user know if we can do DXT or not	*/
 	return has_DXT_capability;
+}
+
+
+bool isFeatureSupported(
+#ifdef SOIL_SUPPORT_CONTEXT_ABOVE_3_1
+	const std::string& featureName
+#else
+	const char* featureName
+#endif
+)
+{
+#ifdef SOIL_SUPPORT_CONTEXT_ABOVE_3_1
+	
+	static std::set<std::string> supportedFeatures;
+
+	if (supportedFeatures.empty())
+	{
+		GLint n;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+
+		for (int i = 0; i < n; i++)
+		{
+			supportedFeatures.insert( (const char*)(glGetStringi(GL_EXTENSIONS, i) ));
+		}
+	}
+
+	return supportedFeatures.find(featureName) != supportedFeatures.end();
+
+#else
+	return NULL != strstr(
+		(char const*)glGetString(GL_EXTENSIONS),
+		featureName);
+#endif
 }
