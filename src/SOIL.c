@@ -50,8 +50,10 @@ enum
 	SOIL_CAPABILITY_NONE = 0,
 	SOIL_CAPABILITY_PRESENT = 1
 };
+
 static int has_cubemap_capability = SOIL_CAPABILITY_UNKNOWN;
 int query_cubemap_capability(void);
+
 #define SOIL_TEXTURE_WRAP_R					0x8072
 #define SOIL_CLAMP_TO_EDGE					0x812F
 #define SOIL_NORMAL_MAP						0x8511
@@ -83,11 +85,13 @@ int query_DXT_capability(void);
 #define SOIL_RGBA_S3TC_DXT5		0x83F3
 typedef void (APIENTRY * P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC) (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid * data);
 P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC soilGlCompressedTexImage2D = NULL;
+
 unsigned int SOIL_direct_load_DDS(
 	const char *filename,
 	unsigned int reuse_texture_ID,
 	int flags,
 	int loading_as_cubemap);
+
 unsigned int SOIL_direct_load_DDS_from_memory(
 	const unsigned char *const buffer,
 	int buffer_length,
@@ -95,8 +99,8 @@ unsigned int SOIL_direct_load_DDS_from_memory(
 	int flags,
 	int loading_as_cubemap);
 /*	other functions	*/
-unsigned int
-SOIL_internal_create_OGL_texture
+
+unsigned int SOIL_internal_create_OGL_texture
 (
 	const unsigned char *const data,
 	int width, int height, int channels,
@@ -108,8 +112,7 @@ SOIL_internal_create_OGL_texture
 	);
 
 /*	and the code magic begins here [8^)	*/
-unsigned int
-SOIL_load_OGL_texture
+unsigned int SOIL_load_OGL_texture
 (
 	const char *filename,
 	int force_channels,
@@ -160,8 +163,7 @@ SOIL_load_OGL_texture
 	return tex_id;
 }
 
-unsigned int
-SOIL_load_OGL_HDR_texture
+unsigned int SOIL_load_OGL_HDR_texture
 (
 	const char *filename,
 	int fake_HDR_format,
@@ -213,8 +215,7 @@ SOIL_load_OGL_HDR_texture
 	return tex_id;
 }
 
-unsigned int
-SOIL_load_OGL_texture_from_memory
+unsigned int SOIL_load_OGL_texture_from_memory
 (
 	const unsigned char *const buffer,
 	int buffer_length,
@@ -271,8 +272,7 @@ SOIL_load_OGL_texture_from_memory
 	return tex_id;
 }
 
-unsigned int
-SOIL_load_OGL_cubemap
+unsigned int SOIL_load_OGL_cubemap
 (
 	const char *x_pos_file,
 	const char *x_neg_file,
@@ -456,8 +456,7 @@ SOIL_load_OGL_cubemap
 	return tex_id;
 }
 
-unsigned int
-SOIL_load_OGL_cubemap_from_memory
+unsigned int SOIL_load_OGL_cubemap_from_memory
 (
 	const unsigned char *const x_pos_buffer,
 	int x_pos_buffer_length,
@@ -659,8 +658,7 @@ SOIL_load_OGL_cubemap_from_memory
 	return tex_id;
 }
 
-unsigned int
-SOIL_load_OGL_single_cubemap
+unsigned int SOIL_load_OGL_single_cubemap
 (
 	const char *filename,
 	const char face_order[6],
@@ -744,8 +742,7 @@ SOIL_load_OGL_single_cubemap
 	return tex_id;
 }
 
-unsigned int
-SOIL_load_OGL_single_cubemap_from_memory
+unsigned int SOIL_load_OGL_single_cubemap_from_memory
 (
 	const unsigned char *const buffer,
 	int buffer_length,
@@ -835,8 +832,7 @@ SOIL_load_OGL_single_cubemap_from_memory
 	return tex_id;
 }
 
-unsigned int
-SOIL_create_OGL_single_cubemap
+unsigned int SOIL_create_OGL_single_cubemap
 (
 	const unsigned char *const data,
 	int width, int height, int channels,
@@ -947,8 +943,7 @@ SOIL_create_OGL_single_cubemap
 	return tex_id;
 }
 
-unsigned int
-SOIL_create_OGL_texture
+unsigned int SOIL_create_OGL_texture
 (
 	const unsigned char *const data,
 	int width, int height, int channels,
@@ -982,8 +977,7 @@ void check_for_GL_errors(const char *calling_location)
 }
 #endif
 
-unsigned int
-SOIL_internal_create_OGL_texture
+unsigned int SOIL_internal_create_OGL_texture
 (
 	const unsigned char *const data,
 	int width, int height, int channels,
